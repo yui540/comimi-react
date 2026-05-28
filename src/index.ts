@@ -1,3 +1,6 @@
+export { MangaViewer } from "./MangaViewer";
+export type { MangaViewerProps, MangaViewerHandle } from "./MangaViewer";
+
 export { useMangaViewer } from "./useMangaViewer";
 export type {
   UseMangaViewerOptions,
