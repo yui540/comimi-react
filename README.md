@@ -1,8 +1,5 @@
 # @yui540/comimi-react
 
-[![npm](https://img.shields.io/npm/v/@yui540/comimi-react.svg)](https://www.npmjs.com/package/@yui540/comimi-react)
-[![license](https://img.shields.io/npm/l/@yui540/comimi-react.svg)](./LICENSE)
-
 [@yui540/comimi](https://www.npmjs.com/package/@yui540/comimi) を React で扱うための薄いラッパーライブラリです。`<MangaViewer />` コンポーネントと `useMangaViewer()` フックの2通りの使い方を提供します。
 
 ## 特徴
