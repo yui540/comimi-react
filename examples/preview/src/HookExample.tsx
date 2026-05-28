@@ -39,8 +39,8 @@ export function HookExample() {
         viewer: {viewer ? "ready" : "loading…"}
       </p>
       <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-        <button onClick={() => viewer?.previousPage()}>← 前</button>
-        <button onClick={() => viewer?.nextPage()}>次 →</button>
+        <button onClick={() => viewer?.nextPage()}>← 次</button>
+        <button onClick={() => viewer?.previousPage()}>前 →</button>
         <button onClick={() => viewer?.goToPage(0)}>最初へ</button>
         <button onClick={() => viewer?.toggleAutoPageTurn()}>自動再生</button>
         <button

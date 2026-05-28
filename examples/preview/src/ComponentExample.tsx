@@ -23,8 +23,8 @@ export function ComponentExample() {
         現在のページ: {pageIndex + 1} / {manga.pages.length}
       </p>
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <button onClick={() => viewerRef.current?.previousPage()}>← 前</button>
-        <button onClick={() => viewerRef.current?.nextPage()}>次 →</button>
+        <button onClick={() => viewerRef.current?.nextPage()}>← 次</button>
+        <button onClick={() => viewerRef.current?.previousPage()}>前 →</button>
         <button onClick={() => viewerRef.current?.goToPage(0)}>最初へ</button>
         <button onClick={() => viewerRef.current?.toggleAutoPageTurn()}>
           自動再生
