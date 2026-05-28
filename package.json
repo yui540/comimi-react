@@ -1,0 +1,55 @@
+{
+  "name": "@yui540/comimi-react",
+  "version": "0.1.0",
+  "description": "React wrapper for @yui540/comimi manga viewer",
+  "keywords": [
+    "manga",
+    "comic",
+    "viewer",
+    "reader",
+    "react",
+    "comimi",
+    "typescript"
+  ],
+  "license": "MIT",
+  "author": "yui540",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "dev": "vite examples/preview --host 0.0.0.0",
+    "build": "tsc --noEmit && vite build && tsc -p tsconfig.build.json",
+    "preview": "vite preview examples/preview --host 0.0.0.0",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@yui540/comimi": "^0.2.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "@yui540/comimi": "^0.2.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0"
+  }
+}
