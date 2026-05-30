@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { ComponentExample } from "./ComponentExample";
 import { HookExample } from "./HookExample";
+import { ReactContentExample } from "./ReactContentExample";
 
-type Mode = "component" | "hook";
+type Mode = "component" | "hook" | "react-content";
 
 export function App() {
   const [mode, setMode] = useState<Mode>("component");
@@ -40,6 +41,12 @@ export function App() {
         >
           useMangaViewer()
         </button>
+        <button
+          style={tabStyle(mode === "react-content")}
+          onClick={() => setMode("react-content")}
+        >
+          React コンテンツ
+        </button>
       </div>
       <div
         style={{
@@ -50,7 +57,9 @@ export function App() {
           borderRadius: "0 0 6px 6px",
         }}
       >
-        {mode === "component" ? <ComponentExample /> : <HookExample />}
+        {mode === "component" && <ComponentExample />}
+        {mode === "hook" && <HookExample />}
+        {mode === "react-content" && <ReactContentExample />}
       </div>
     </div>
   );

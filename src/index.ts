@@ -7,6 +7,9 @@ export type {
   UseMangaViewerResult,
 } from "./useMangaViewer";
 
+export { isReactContentPage } from "./types";
+export type { ReactManga, ReactMangaPage, ReactHtmlPage } from "./types";
+
 export type {
   HtmlPage,
   ImagePage,

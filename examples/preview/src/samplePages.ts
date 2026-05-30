@@ -6,7 +6,7 @@ const sampleImages = import.meta.glob("../sample-comic/*.webp", {
   import: "default",
 }) as Record<string, string>;
 
-const imagePages: MangaPage[] = Object.entries(sampleImages)
+export const imagePages: MangaPage[] = Object.entries(sampleImages)
   .map(([path, url]) => {
     const match = path.match(/\/(\d+)\.webp$/);
     if (!match) return null;

@@ -35,7 +35,7 @@ export const MangaViewer = forwardRef<MangaViewerHandle, MangaViewerProps>(
       ...divProps
     } = props;
 
-    const { containerRef, viewer } = useMangaViewer({
+    const { containerRef, viewer, portals } = useMangaViewer({
       manga,
       initialPageIndex,
       locale,
@@ -54,6 +54,11 @@ export const MangaViewer = forwardRef<MangaViewerHandle, MangaViewerProps>(
 
     useImperativeHandle(ref, () => viewer as MangaViewerHandle, [viewer]);
 
-    return <div ref={containerRef} {...divProps} />;
+    return (
+      <>
+        <div ref={containerRef} {...divProps} />
+        {portals}
+      </>
+    );
   },
 );

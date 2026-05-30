@@ -122,6 +122,65 @@ function Reader() {
 |---|---|---|
 | `containerRef` | `RefObject<HTMLDivElement \| null>` | ビューワーをマウントする div に渡す ref |
 | `viewer` | `MangaViewerInstance \| null` | 命令的操作用のインスタンス。マウント完了前は `null` |
+| `portals` | `ReactPortal[]` | React コンテンツページ（後述）を描画するポータル。**JSX のどこかに必ずレンダーしてください** |
+
+> フックで React コンテンツページを使う場合は、`portals` を JSX にレンダーする必要があります（描画位置はどこでも構いません。実際の描画はページ内のホスト要素に対して行われます）。`<MangaViewer />` を使う場合は自動で処理されます。
+>
+> ```tsx
+> const { containerRef, portals } = useMangaViewer({ manga });
+> return (
+>   <div>
+>     <div ref={containerRef} style={{ minHeight: 600 }} />
+>     {portals}
+>   </div>
+> );
+> ```
+
+---
+
+## React コンポーネントをページに埋め込む
+
+画像や HTML 文字列だけでなく、**React コンポーネントをそのままページの中身として渡せます**。`type: "html"` のページに `html`（文字列）の代わりに `content`（`ReactNode`）を指定してください。
+
+```tsx
+import { MangaViewer, type ReactManga } from "@yui540/comimi-react";
+
+function App() {
+  const [likes, setLikes] = useState(0);
+
+  const manga: ReactManga = useMemo(
+    () => ({
+      id: "sample",
+      title: "サンプル",
+      pages: [
+        { id: "p0", type: "image", src: "/pages/0.webp" },
+        {
+          id: "p1",
+          type: "html",
+          content: (
+            <div style={{ padding: 24 }}>
+              <h2>あとがき</h2>
+              <button onClick={() => setLikes((n) => n + 1)}>
+                いいね {likes}
+              </button>
+            </div>
+          ),
+        },
+      ],
+    }),
+    [likes],
+  );
+
+  return <MangaViewer manga={manga} style={{ minHeight: 600 }} />;
+}
+```
+
+- `content` は React の **ポータル**で描画されるため、`useState` などの状態・イベントハンドラ・hooks がそのまま動きます。
+- **`content` の中身が変わると即座に反映されます**（上の例の「いいね」カウントなど）。ページ構成（ID・並び順・画像・HTML 文字列）が変わらない限り、ビューワーのリセットや再読み込みは発生しません。
+- `manga` の型は `Manga` ではなく **`ReactManga`** を使ってください（`pages` に `content` を許可した型）。
+- `content` を指定したページでは `html` は無視されます（`content` 未指定時のフォールバックとして併用も可能）。
+
+> ⚠️ この機能は `@yui540/comimi` **0.3.2 以降**が必要です（ページに React のホスト要素をマウントする `HtmlPage.element` を利用します）。
 
 ---
 
@@ -133,7 +192,7 @@ function Reader() {
 
 | 名前 | 型 | 説明 |
 |---|---|---|
-| `manga` | `Manga` | **必須**。表示する漫画データ |
+| `manga` | `ReactManga` | **必須**。表示する漫画データ。`pages` の `type: "html"` ページには `content`（`ReactNode`）を指定可能 |
 | `initialPageIndex` | `number` | 初期表示するページのインデックス |
 | `locale` | `string` | UI 言語 (`"ja"` / `"en"` / `"zh-CN"` / `"ko"` / `"th"` / `"id"` または独自キー) |
 | `translations` | `TranslationMap` | 翻訳キーの上書き / 追加 |
@@ -174,7 +233,7 @@ function Reader() {
 
 | プロップ | 変更時の挙動 |
 |---|---|
-| `manga` | 参照が変わると `setManga()` を呼び出してリロード |
+| `manga` | **ページ構成**（ID・並び順・画像 src・HTML 文字列など）が変わると `setManga()` を呼び出してリロード。React `content` だけの変更ではリロードせず、ポータル経由で即反映 |
 | `settings` | 参照が変わると `updateSettings()` でマージ |
 | その他 | **初回マウント時のみ反映**（下記） |
 
@@ -186,10 +245,10 @@ function Reader() {
 
 ### 不要な再生成を避ける
 
-`manga` と `settings` は参照比較で変更検知しているため、毎レンダーで新しいオブジェクトを渡すと毎回 `setManga` / `updateSettings` が走ります。`useMemo` か外部定数で安定化させてください。
+`manga` はページ構成のシグネチャ（ID・並び順・画像 src・HTML 文字列など）で変更検知するため、毎レンダーで新しいオブジェクトを渡しても構成が同じならリロードは走りません。一方 `settings` は参照比較なので、毎レンダーで新しいオブジェクトを渡すと毎回 `updateSettings` が走ります。`useMemo` か外部定数で安定化させてください。
 
 ```tsx
-const manga = useMemo<Manga>(() => ({ id, title, pages }), [id, title, pages]);
+const settings = useMemo(() => ({ readingDirection: "rtl" }), []);
 ```
 
 ### イベントハンドラの安定性
@@ -277,10 +336,15 @@ import { MangaViewer } from "@yui540/comimi-react";
 
 ### 型のエクスポート
 
-comimi 側の主要な型は本パッケージから再エクスポートされています。
+comimi 側の主要な型に加え、React コンテンツ用の型（`ReactManga` / `ReactMangaPage` / `ReactHtmlPage`）も本パッケージからエクスポートされています。
 
 ```ts
 import type {
+  // React 用
+  ReactManga,
+  ReactMangaPage,
+  ReactHtmlPage,
+  // comimi 再エクスポート
   Manga,
   MangaPage,
   ImagePage,
