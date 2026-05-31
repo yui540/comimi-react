@@ -42,7 +42,8 @@
     "dev": "vite examples/preview --host 0.0.0.0",
     "build": "tsc --noEmit && vite build && tsc -p tsconfig.build.json",
     "preview": "vite preview examples/preview --host 0.0.0.0",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
     "@yui540/comimi": "^0.3.2",
