@@ -11,6 +11,7 @@ export { isReactContentPage } from "./types";
 export type { ReactManga, ReactMangaPage, ReactHtmlPage } from "./types";
 
 export type {
+  HideableControl,
   HtmlPage,
   ImagePage,
   LayoutMode,

@@ -89,6 +89,8 @@ export function useMangaViewer(
     resolvePageSrc: options.resolvePageSrc,
     lockLayoutMode: options.lockLayoutMode,
     mascot: options.mascot,
+    hiddenSettings: options.hiddenSettings,
+    forceSettings: options.forceSettings,
   });
   const mangaRef = useRef<ReactManga>(options.manga);
   mangaRef.current = options.manga;
