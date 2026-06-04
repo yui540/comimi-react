@@ -2,8 +2,9 @@ import { useState } from "react";
 import { ComponentExample } from "./ComponentExample";
 import { HookExample } from "./HookExample";
 import { ReactContentExample } from "./ReactContentExample";
+import { HiddenSettingsExample } from "./HiddenSettingsExample";
 
-type Mode = "component" | "hook" | "react-content";
+type Mode = "component" | "hook" | "react-content" | "hidden-settings";
 
 export function App() {
   const [mode, setMode] = useState<Mode>("component");
@@ -47,6 +48,12 @@ export function App() {
         >
           React コンテンツ
         </button>
+        <button
+          style={tabStyle(mode === "hidden-settings")}
+          onClick={() => setMode("hidden-settings")}
+        >
+          hiddenSettings
+        </button>
       </div>
       <div
         style={{
@@ -60,6 +67,7 @@ export function App() {
         {mode === "component" && <ComponentExample />}
         {mode === "hook" && <HookExample />}
         {mode === "react-content" && <ReactContentExample />}
+        {mode === "hidden-settings" && <HiddenSettingsExample />}
       </div>
     </div>
   );
