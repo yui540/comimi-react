@@ -20,6 +20,7 @@ export const MangaViewer = forwardRef<MangaViewerHandle, MangaViewerProps>(
     const {
       manga,
       initialPageIndex,
+      initialPageQueryParam,
       locale,
       translations,
       settings,
@@ -40,6 +41,7 @@ export const MangaViewer = forwardRef<MangaViewerHandle, MangaViewerProps>(
     const { containerRef, viewer, portals } = useMangaViewer({
       manga,
       initialPageIndex,
+      initialPageQueryParam,
       locale,
       translations,
       settings,
