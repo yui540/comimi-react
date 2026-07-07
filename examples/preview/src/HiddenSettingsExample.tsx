@@ -15,14 +15,14 @@ const manga: Manga = {
 };
 
 // HideableControl の全項目と日本語ラベル。
-// 設定パネルの行（locale / cover / direction / interval / backgroundColor）と
+// 設定パネルの行（locale / theme / cover / direction / interval）と
 // ツールバーの操作（pageMode / autoplay / viewMode）を個別に隠せる。
 const controls: { key: HideableControl; label: string; group: string }[] = [
   { key: "locale", label: "言語", group: "設定パネル" },
+  { key: "theme", label: "テーマ", group: "設定パネル" },
   { key: "cover", label: "表紙", group: "設定パネル" },
   { key: "direction", label: "読み方向", group: "設定パネル" },
   { key: "interval", label: "自動再生の間隔", group: "設定パネル" },
-  { key: "backgroundColor", label: "背景色", group: "設定パネル" },
   { key: "pageMode", label: "ページめくりモード", group: "ツールバー" },
   { key: "autoplay", label: "自動再生", group: "ツールバー" },
   { key: "viewMode", label: "表示モード", group: "ツールバー" },

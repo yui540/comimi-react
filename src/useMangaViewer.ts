@@ -82,6 +82,7 @@ export function useMangaViewer(
     Omit<MangaViewerOptions, "manga" | "events">
   >({
     initialPageIndex: options.initialPageIndex,
+    initialPageQueryParam: options.initialPageQueryParam,
     locale: options.locale,
     translations: options.translations,
     settings: options.settings,
