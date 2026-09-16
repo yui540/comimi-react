@@ -201,29 +201,51 @@ function App() {
 | `resolvePageSrc` | `PageSrcResolver` | ページ画像 URL の動的解決（DRM / 認証付き fetch） |
 | `lockLayoutMode` | `boolean` | レイアウトモードを `settings.layoutMode` に固定 |
 | `mascot` | `MascotOption` | マスコット画像の差し替え（`{ src }` / `{ render }` / `false`） |
-| `onReady` | `(e) => void` | ビューワー準備完了時 |
+| `hiddenSettings` | `HideableControl[]` | 非表示にする UI 項目 |
+| `forceSettings` | `(keyof ViewerSettings)[]` | 保存値より初期値を優先する設定キー |
+| `onReady` | `(e: { manga }) => void` | ビューワー準備完了時（保存値の復元後） |
+| `onMangaChange` | `(e: { manga }) => void` | `setManga` / `setPages` で作品が差し替わった時 |
 | `onPageChange` | `(e: { pageIndex, page }) => void` | ページ変更時 |
 | `onSettingsChange` | `(e: { settings }) => void` | 設定変更時 |
-| `onLayoutChange` | `(e: { layoutMode }) => void` | レイアウト変更時 |
+| `onLayoutChange` | `(e: { layoutMode }) => void` | 表示モード変更時 |
+| `onOverlayChange` | `(e: { visible }) => void` | オーバーレイの表示 / 非表示 |
+| `onPanelChange` | `(e: { panel }) => void` | メニュー・設定などのパネルの開閉 |
+| `onAutoPageTurnChange` | `(e: { enabled }) => void` | 自動再生の開始 / 停止 |
+| `onZoomChange` | `(e: { scale, panX, panY }) => void` | ズーム倍率・パン位置の変化（パン中は連続発火） |
+| `onFavoritesChange` | `(e: { pageIds, pageId?, added? }) => void` | 「ここすき！」の変更 |
+| `onNotification` | `(e: { message, tone }) => void` | トースト通知の表示 |
+| `onPageLoadError` | `(e: { pageIndex, page }) => void` | ページ画像の読み込み失敗 |
 | `onDestroy` | `() => void` | 破棄時 |
+
+イベント props は comimi の `ViewerEventMap` から `on<EventName>` の形で自動生成されます（型は `ViewerEventProps`）。各イベントの詳細は [comimi のドキュメント](https://github.com/yui540/comimi/blob/main/docs/USAGE.md#イベント) を参照してください。
 
 各設定値のデフォルトと意味は [comimi のドキュメント](https://github.com/yui540/comimi/blob/main/docs/USAGE.md) を参照してください。
 
 ### `MangaViewerHandle` / `viewer` インスタンスメソッド
 
+comimi の `MangaViewerInstance` がそのまま公開されます。主なもの：
+
 | メソッド | 説明 |
 |---|---|
-| `goToPage(pageIndex)` | 指定ページへジャンプ |
+| `goToPage(pageIndex)` | 指定ページへジャンプ（範囲外はクランプ） |
 | `nextPage()` / `previousPage()` | 次 / 前のページへ |
-| `setManga(manga)` | 漫画を差し替える |
-| `setPages(pages)` | ページ配列のみ差し替え |
+| `getCurrentPageIndex()` / `getPageCount()` | 現在ページ index / 総ページ数 |
+| `setManga(manga)` / `setPages(pages)` | 漫画・ページ配列の差し替え |
 | `updateSettings(partial)` | 設定をマージ更新 |
-| `toggleOverlay(force?)` | オーバーレイの表示切替 |
-| `toggleAutoPageTurn()` | 自動再生のオン / オフ |
-| `toggleFullscreen()` | フルスクリーン切替 |
+| `setLayoutMode(mode)` / `toggleFullscreen()` | 表示モードの切替 |
+| `toggleOverlay(force?)` / `setOverlayVisible(visible)` | オーバーレイの表示切替 |
+| `setPanel(panel)` | メニュー・設定・ページ一覧・ここすき！などのパネルを開閉（`"none"` で閉じる） |
+| `toggleAutoPageTurn()` / `setAutoPageTurn(enabled)` | 自動再生のオン / オフ |
+| `setZoom(scale, panX?, panY?)` / `resetZoom()` | ズーム |
+| `toggleFavorite(i)` / `addFavorite(i)` / `removeFavorite(i)` / `isFavorite(i)` | 「ここすき！」の操作 |
+| `getFavoritePageIds()` / `setFavorites(ids)` / `clearFavorites()` | 「ここすき！」一覧の取得・置き換え |
+| `notify(message, tone?)` | トースト通知を表示 |
 | `getState()` | 現在の `ViewerState` を取得（読み取り専用） |
-| `on(eventName, handler)` | イベント購読。戻り値は解除関数 |
+| `getElement()` / `isMobileViewport()` | ルート要素 / モバイル幅判定 |
+| `on(eventName, handler)` / `once(eventName, handler)` | イベント購読。戻り値は解除関数 |
 | `destroy()` | 明示的な破棄（通常は unmount で自動実行） |
+
+全メソッドは [comimi のドキュメント](https://github.com/yui540/comimi/blob/main/docs/USAGE.md#api) を参照してください。
 
 ---
 
@@ -253,7 +275,7 @@ const settings = useMemo(() => ({ readingDirection: "rtl" }), []);
 
 ### イベントハンドラの安定性
 
-`onPageChange` 等のハンドラは内部 ref に保持されるため、毎レンダーで関数を作り直しても問題ありません（ビューワーは再生成されず、常に最新のハンドラが呼ばれます）。
+`onPageChange` 等のイベント props はすべて内部 ref に保持されるため、毎レンダーで関数を作り直しても問題ありません（ビューワーは再生成されず、常に最新のハンドラが呼ばれます）。ハンドラを後から追加・削除しても再マウントは起きません。
 
 ### StrictMode
 
@@ -356,7 +378,14 @@ import type {
   PageTurnMode,
   TranslationMap,
   ViewerEventMap,
+  ViewerPanel,
+  NotificationTone,
+  MascotOption,
+  MascotAreaOptions,
   MangaViewerInstance,
+  MangaViewerOptions,
+  // イベント props の型
+  ViewerEventProps,
 } from "@yui540/comimi-react";
 ```
 

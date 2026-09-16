@@ -8,17 +8,60 @@ import {
   type MangaViewerInstance,
   type MangaViewerOptions,
   type ViewerEventMap,
+  type ViewerEventName,
 } from "@yui540/comimi";
 import { isReactContentPage, type ReactManga } from "./types";
 
+/**
+ * comimi の各イベントを `on<EventName>` 形式の props にしたもの。
+ * 例: `pageChange` → `onPageChange`、`favoritesChange` → `onFavoritesChange`。
+ */
+export type ViewerEventProps = {
+  [K in ViewerEventName as `on${Capitalize<K>}`]?: ViewerEventMap[K] extends void
+    ? () => void
+    : (event: ViewerEventMap[K]) => void;
+};
+
+const EVENT_NAMES = [
+  "ready",
+  "mangaChange",
+  "pageChange",
+  "settingsChange",
+  "layoutChange",
+  "overlayChange",
+  "panelChange",
+  "autoPageTurnChange",
+  "zoomChange",
+  "favoritesChange",
+  "notification",
+  "pageLoadError",
+  "destroy",
+] as const satisfies readonly ViewerEventName[];
+
+type EventPropName = keyof ViewerEventProps;
+
+function toPropName(eventName: ViewerEventName): EventPropName {
+  return `on${eventName.charAt(0).toUpperCase()}${eventName.slice(1)}` as EventPropName;
+}
+
+export const VIEWER_EVENT_PROP_NAMES: readonly EventPropName[] =
+  EVENT_NAMES.map(toPropName);
+
+/** props からイベントハンドラだけを取り出す。 */
+export function pickViewerEventProps<T extends ViewerEventProps>(
+  props: T,
+): ViewerEventProps {
+  const picked: Record<string, unknown> = {};
+  for (const name of VIEWER_EVENT_PROP_NAMES) {
+    if (props[name] !== undefined) picked[name] = props[name];
+  }
+  return picked as ViewerEventProps;
+}
+
 export interface UseMangaViewerOptions
-  extends Omit<MangaViewerOptions, "events" | "className" | "manga"> {
+  extends Omit<MangaViewerOptions, "events" | "className" | "manga">,
+    ViewerEventProps {
   manga: ReactManga;
-  onReady?: (event: ViewerEventMap["ready"]) => void;
-  onPageChange?: (event: ViewerEventMap["pageChange"]) => void;
-  onSettingsChange?: (event: ViewerEventMap["settingsChange"]) => void;
-  onLayoutChange?: (event: ViewerEventMap["layoutChange"]) => void;
-  onDestroy?: () => void;
 }
 
 export interface UseMangaViewerResult {
@@ -34,20 +77,9 @@ export function useMangaViewer(
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [viewer, setViewer] = useState<MangaViewerInstance | null>(null);
 
-  const handlersRef = useRef({
-    onReady: options.onReady,
-    onPageChange: options.onPageChange,
-    onSettingsChange: options.onSettingsChange,
-    onLayoutChange: options.onLayoutChange,
-    onDestroy: options.onDestroy,
-  });
-  handlersRef.current = {
-    onReady: options.onReady,
-    onPageChange: options.onPageChange,
-    onSettingsChange: options.onSettingsChange,
-    onLayoutChange: options.onLayoutChange,
-    onDestroy: options.onDestroy,
-  };
+  // ハンドラは ref に保持し、毎レンダーで関数が変わってもビューワーを再生成しない。
+  const handlersRef = useRef<ViewerEventProps>(pickViewerEventProps(options));
+  handlersRef.current = pickViewerEventProps(options);
 
   // Stable host elements that React portals render into, keyed by page id.
   // Reusing the same element across renders lets the viewer cache the page
@@ -100,17 +132,23 @@ export function useMangaViewer(
     const container = containerRef.current;
     if (!container) return;
 
+    const events: NonNullable<MangaViewerOptions["events"]> = {};
+    for (const eventName of EVENT_NAMES) {
+      const propName = toPropName(eventName);
+      (events as Record<string, (payload: unknown) => void>)[eventName] = (
+        payload: unknown,
+      ) => {
+        const handler = handlersRef.current[propName] as
+          | ((payload: unknown) => void)
+          | undefined;
+        handler?.(payload);
+      };
+    }
+
     const instance = createMangaViewer(container, {
       ...initialOptionsRef.current,
       manga: toCoreManga(mangaRef.current),
-      events: {
-        ready: (event) => handlersRef.current.onReady?.(event),
-        pageChange: (event) => handlersRef.current.onPageChange?.(event),
-        settingsChange: (event) =>
-          handlersRef.current.onSettingsChange?.(event),
-        layoutChange: (event) => handlersRef.current.onLayoutChange?.(event),
-        destroy: () => handlersRef.current.onDestroy?.(),
-      },
+      events,
     });
 
     setViewer(instance);

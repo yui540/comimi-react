@@ -3,6 +3,7 @@ import {
   MangaViewer,
   type Manga,
   type MangaViewerHandle,
+  type ViewerPanel,
 } from "@yui540/comimi-react";
 import { samplePages } from "./samplePages";
 
@@ -16,11 +17,15 @@ const manga: Manga = {
 export function ComponentExample() {
   const viewerRef = useRef<MangaViewerHandle>(null);
   const [pageIndex, setPageIndex] = useState(0);
+  const [panel, setPanel] = useState<ViewerPanel>("none");
+  const [favoriteCount, setFavoriteCount] = useState(0);
 
   return (
     <div>
       <p>
-        現在のページ: {pageIndex + 1} / {manga.pages.length}
+        現在のページ: {pageIndex + 1} / {manga.pages.length} ／ パネル:{" "}
+        <span data-testid="panel">{panel}</span> ／ ここすき！:{" "}
+        <span data-testid="favorites">{favoriteCount}</span>
       </p>
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         <button onClick={() => viewerRef.current?.nextPage()}>← 次</button>
@@ -28,6 +33,12 @@ export function ComponentExample() {
         <button onClick={() => viewerRef.current?.goToPage(0)}>最初へ</button>
         <button onClick={() => viewerRef.current?.toggleAutoPageTurn()}>
           自動再生
+        </button>
+        <button onClick={() => viewerRef.current?.setPanel("favorites")}>
+          ここすき！一覧
+        </button>
+        <button onClick={() => viewerRef.current?.notify("こんにちは", "success")}>
+          トースト
         </button>
       </div>
       <MangaViewer
@@ -46,6 +57,8 @@ export function ComponentExample() {
           setPageIndex(pageIndex);
           console.log("[component] pageChange", pageIndex + 1);
         }}
+        onPanelChange={({ panel }) => setPanel(panel)}
+        onFavoritesChange={({ pageIds }) => setFavoriteCount(pageIds.length)}
         style={{ width: "100%", minHeight: 600 }}
       />
     </div>
